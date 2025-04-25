@@ -1,7 +1,10 @@
-const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { Player } = require('../models');
 
-// Register
+const hashPassword = (password) => {
+    return crypto.createHash('sha256').update(password).digest('hex');
+};
+
 exports.register = async (req, res) => {
     const { username, password, faction } = req.body;
 
@@ -15,7 +18,7 @@ exports.register = async (req, res) => {
             return res.status(400).json({ message: 'Username already exists.' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = hashPassword(password);
         const newPlayer = await Player.create({
             username,
             password: hashedPassword,
@@ -30,7 +33,6 @@ exports.register = async (req, res) => {
     }
 };
 
-// Login
 exports.login = async (req, res) => {
     const { username, password } = req.body;
 
@@ -44,20 +46,19 @@ exports.login = async (req, res) => {
             return res.status(400).json({ message: 'Invalid username or password.' });
         }
 
-        const isPasswordValid = await bcrypt.compare(password, player.password);
-        if (!isPasswordValid) {
+        const hashedPassword = hashPassword(password);
+        if (player.password !== hashedPassword) {
             return res.status(400).json({ message: 'Invalid username or password.' });
         }
 
         req.session.playerId = player.player_id;
-        res.redirect('/dashboard'); 
+        res.redirect('/dashboard');
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error.');
     }
 };
 
-// Logout
 exports.logout = (req, res) => {
     req.session.destroy((err) => {
         if (err) {

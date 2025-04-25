@@ -1,0 +1,90 @@
+#menu {
+    margin-bottom: 10px;
+}
+
+#navigation-menu {
+    margin-bottom: 10px;
+}
+
+#dashboard-container {
+    display: flex;
+}
+
+#info-menu-container {
+    display: flex;
+    flex-direction: column;
+    margin-right: 20px;
+}
+
+#map-container {
+    display: grid;
+    grid-template-columns: repeat(16, 50px);
+    gap: 2px;
+}
+
+.tile {
+    width: 50px;
+    height: 50px;
+    border: 1px solid black;
+    text-align: center;
+    cursor: pointer;
+}
+
+.tile.plains {
+    background-color: lightgreen;
+}
+
+.tile.forest {
+    background-color: darkgreen;
+}
+
+.tile.mountains {
+    background-color: gray;
+}
+
+.tile.desert {
+    background-color: goldenrod;
+}
+
+.tile.water {
+    background-color: blue;
+}
+
+#tile-info {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid black;
+    background-color: #f9f9f9;
+}
+
+#tile-details-container {
+    margin-left: 20px;
+    padding: 10px;
+    border: 1px solid black;
+    background-color: #f9f9f9;
+    width: 200px;
+    margin-top: 20px;
+}
+
+#queue-action-form {
+    margin-top: 10px;
+}
+
+#action-queue-container {
+    margin-left: 20px;
+    padding: 10px;
+    border: 1px solid black;
+    background-color: #f9f9f9;
+    width: 200px;
+    margin-top: 20px;
+}
+
+#action-queue-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+#process-actions-button {
+    margin-top: 10px;
+}

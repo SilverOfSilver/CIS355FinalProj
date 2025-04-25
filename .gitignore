@@ -1,2 +1,3 @@
 database/arellia.sqlite
 .env
+node_modules

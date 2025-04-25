@@ -4,7 +4,6 @@ module.exports = (sequelize, DataTypes) => {
         terrain_type: { type: DataTypes.STRING, allowNull: false },
         resources: { type: DataTypes.JSON, defaultValue: {} },
         owner_id: { type: DataTypes.INTEGER, allowNull: true },
-        level_of_detail: { type: DataTypes.STRING, allowNull: false, defaultValue: 'high' },
     });
     Tile.associate = (models) => {
         Tile.belongsTo(models.Player, { foreignKey: 'owner_id' });

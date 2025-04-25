@@ -1,0 +1,135 @@
+<h1>Dashboard</h1>
+<p>{{username}}</p>
+<p>Faction: {{faction}}</p>
+<p>Resources: {{resources}}</p>
+
+<div id="menu" style="margin-bottom: 10px;">
+    <button class="view-button" data-view="terrain">Terrain View</button>
+    <button class="view-button" data-view="resources">Resource View</button>
+    <button class="view-button" data-view="units">Unit View</button>
+    <br>
+    <button id="decrease-sublevel">-</button>
+    <span id="current-sublevel">Sublevel: 0</span>
+    <button id="increase-sublevel">+</button>
+</div>
+
+<div id="zoom-menu" style="margin-bottom: 10px;">
+    <button id="zoom-in">Zoom In</button>
+    <button id="zoom-out">Zoom Out</button>
+</div>
+
+{{#if tiles.length}}
+<div id="map-container" style="display: grid; grid-template-columns: repeat(10, 50px); gap: 2px;">
+    {{#each tiles}}
+    <div 
+        class="tile" 
+        style="width: 50px; height: 50px; border: 1px solid black; text-align: center; background-color: {{getTerrainColor terrain_type}};"
+        data-terrain="{{terrain_type}}"
+        data-resources="{{resources}}"
+        data-units="{{unit}}"
+        title="Tile ID: {{tile_id}}, Terrain: {{terrain_type}}, Resources: {{resources}}">
+        {{terrain_type}}
+    </div>
+    {{/each}}
+</div>
+{{else}}
+<p>No tiles available to display.</p>
+{{/if}}
+
+<a href="/auth/logout">Logout</a>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tiles = document.querySelectorAll('.tile');
+        const buttons = document.querySelectorAll('.view-button');
+        const sublevelDisplay = document.getElementById('current-sublevel');
+        const increaseSublevelButton = document.getElementById('increase-sublevel');
+        const decreaseSublevelButton = document.getElementById('decrease-sublevel');
+        const zoomInButton = document.getElementById('zoom-in');
+        const zoomOutButton = document.getElementById('zoom-out');
+        const mapContainer = document.getElementById('map-container');
+
+        let currentSublevel = 0;
+        let currentZoomLevel = 'high';
+
+        const updateView = (view) => {
+            tiles.forEach(tile => {
+                if (view === 'terrain') {
+                    tile.textContent = tile.getAttribute('data-terrain');
+                } else if (view === 'resources') {
+                    tile.textContent = tile.getAttribute('data-resources');
+                } else if (view === 'units') {
+                    tile.textContent = tile.getAttribute('data-units') || 'None';
+                }
+            });
+        };
+
+        const fetchTiles = async (zoomLevel) => {
+            try {
+                const response = await fetch(`/map?level_of_detail=${zoomLevel}`);
+                const tiles = await response.json();
+                mapContainer.innerHTML = '';
+                tiles.forEach(tile => {
+                    const tileDiv = document.createElement('div');
+                    tileDiv.className = 'tile';
+                    tileDiv.style = `
+                        width: 50px; height: 50px; border: 1px solid black; 
+                        text-align: center; background-color: ${getTerrainColor(tile.terrain_type)};
+                    `;
+                    tileDiv.textContent = tile.terrain_type;
+                    mapContainer.appendChild(tileDiv);
+                });
+            } catch (error) {
+                console.error('Error fetching tiles:', error);
+            }
+        };
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                const view = button.getAttribute('data-view');
+                updateView(view);
+            });
+        });
+
+        tiles.forEach(tile => {
+            tile.addEventListener('click', () => {
+                tiles.forEach(t => t.style.outline = 'none');
+                tile.style.outline = '2px solid red';
+            });
+        });
+
+        const updateSublevelDisplay = () => {
+            sublevelDisplay.textContent = `Sublevel: ${currentSublevel}`;
+        };
+
+        increaseSublevelButton.addEventListener('click', () => {
+            currentSublevel++;
+            updateSublevelDisplay();
+            console.log(`Sublevel increased to ${currentSublevel}`);
+        });
+
+        decreaseSublevelButton.addEventListener('click', () => {
+            if (currentSublevel > 0) {
+                currentSublevel--;
+                updateSublevelDisplay();
+                console.log(`Sublevel decreased to ${currentSublevel}`);
+            }
+        });
+
+        zoomInButton.addEventListener('click', () => {
+            if (currentZoomLevel === 'low') currentZoomLevel = 'medium';
+            else if (currentZoomLevel === 'medium') currentZoomLevel = 'high';
+            fetchTiles(currentZoomLevel);
+        });
+
+        zoomOutButton.addEventListener('click', () => {
+            if (currentZoomLevel === 'high') currentZoomLevel = 'medium';
+            else if (currentZoomLevel === 'medium') currentZoomLevel = 'low';
+            fetchTiles(currentZoomLevel);
+        });
+
+        fetchTiles(currentZoomLevel);
+        updateView('terrain');
+        updateSublevelDisplay();
+    });
+</script>
